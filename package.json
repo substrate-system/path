@@ -2,10 +2,26 @@
   "name": "@substrate-system/path",
   "type": "module",
   "description": "the path module from node",
-  "version": "1.0.5",
+  "version": "1.0.3",
   "files": [
     "./dist/*"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./*": {
+      "import": [
+        "./dist/*.js",
+        "./dist/*"
+      ],
+      "require": [
+        "./dist/*.cjs",
+        "./dist/*"
+      ]
+    }
+  },
   "scripts": {
     "lint": "eslint \"./**/*.{ts,js}\"",
     "test": "esbuild test/index.js --format=esm --platform=node --bundle > test/bundle.js && node ./test/bundle.js | tap-spec",
@@ -34,7 +50,6 @@
     "eslint-config-standard": "^17.1.0",
     "markdown-toc": "^1.2.0",
     "postcss-nesting": "^13.0.0",
-    "smokestack": "^3.6.0",
     "tap-spec": "^5.0.0",
     "typedoc": "^0.27.0",
     "typescript": "^5.4.5"
