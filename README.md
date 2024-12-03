@@ -13,7 +13,16 @@ The `path` module from Node.js for browsers
 This implements the Node.js [`path`][path] module for environments that do not have it, like browsers.
 
 <details><summary><h2>Contents</h2></summary>
+
 <!-- toc -->
+
+- [Install](#install)
+- [Usage](#usage)
+- [API](#api)
+- [License](#license)
+
+<!-- tocstop -->
+
 </details>
 
 ## Install

@@ -2,7 +2,7 @@
   "name": "@substrate-system/path",
   "type": "module",
   "description": "the path module from node core for browsers",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "files": [
     "./dist/*"
   ],
