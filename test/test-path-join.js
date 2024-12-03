@@ -56,7 +56,7 @@ var joinTests =
 
 // Windows-specific join tests
 var windowsJoinTests =
-    [// arguments                     result
+    [ // arguments                     result
       // UNC path expected
       [['//foo/bar'], '\\\\foo\\bar\\'],
       [['\\/foo/bar'], '\\\\foo\\bar\\'],

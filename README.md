@@ -8,9 +8,12 @@
 [![dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg?style=flat-square)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
-The `path` module from Node.js for browsers
+The `path` module from Node.js, but agnostic about runtime.
 
-This implements the Node.js [`path`][path] module for environments that do not have it, like browsers.
+>
+> [!WARNING]  
+> This implements [POSIX](https://en.wikipedia.org/wiki/POSIX) style paths only, not windows.
+>
 
 <details><summary><h2>Contents</h2></summary>
 
@@ -38,6 +41,7 @@ import { path } from '@susbtrate-system/path'
 
 const filename = 'logo.png';
 const logo = path.join('./assets/img', filename);
+// => './assets/img/logo.png'
 document.querySelector('#logo').src = logo;
 ```
 
@@ -49,4 +53,4 @@ See the [Node.js path docs][path]. `@substrate-system/path` currently matches th
 
 [MIT](./LICENSE)
 
-[path]: https://nodejs.org/docs/v10.3.0/api/path.html
+[path]: https://nodejs.org/api/path.html
