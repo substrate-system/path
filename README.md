@@ -34,10 +34,10 @@ npm i -S @substrate-system/path
 ## Usage
 
 ```javascript
-var path = require('@susbtrate-system/path')
+import { path } from '@susbtrate-system/path'
 
-var filename = 'logo.png';
-var logo = path.join('./assets/img', filename);
+const filename = 'logo.png';
+const logo = path.join('./assets/img', filename);
 document.querySelector('#logo').src = logo;
 ```
 
