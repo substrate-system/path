@@ -1,10 +1,10 @@
 # path
-![tests](https://github.com/bicycle-codes/crypto-util/actions/workflows/nodejs.yml/badge.svg)
-[![types](https://img.shields.io/npm/types/@substrate-system/icons?style=flat-square)](README.md)
+![tests](https://github.com/substrate-system/path/actions/workflows/nodejs.yml/badge.svg)
+[![types](https://img.shields.io/npm/types/@substrate-system/path?style=flat-square)](README.md)
 [![module](https://img.shields.io/badge/module-ESM%2FCJS-blue?style=flat-square)](README.md)
 [![semantic versioning](https://img.shields.io/badge/semver-2.0.0-blue?logo=semver&style=flat-square)](https://semver.org/)
 [![Common Changelog](https://nichoth.github.io/badge/common-changelog.svg)](./CHANGELOG.md)
-[![install size](https://flat.badgen.net/packagephobia/install/@nichoth/session-cookie)](https://packagephobia.com/result?p=@nichoth/session-cookie)
+[![install size](https://flat.badgen.net/packagephobia/install/@substrate-system/path)](https://packagephobia.com/result?p=@substrate-system/path)
 [![dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen.svg?style=flat-square)](package.json)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
@@ -12,22 +12,20 @@ The `path` module from Node.js for browsers
 
 This implements the Node.js [`path`][path] module for environments that do not have it, like browsers.
 
-> `path-browserify` currently matches the **Node.js 10.3** API.
+<details><summary><h2>Contents</h2></summary>
+<!-- toc -->
+</details>
 
 ## Install
 
-You usually do not have to install `path-browserify` yourself! If your code runs in Node.js, `path` is built in. If your code runs in the browser, bundlers like [browserify](https://github.com/browserify/browserify) or [webpack](https://github.com/webpack/webpack) include the `path-browserify` module by default.
-
-But if none of those apply, with npm do:
-
-```
-npm install path-browserify
+```sh
+npm i -S @substrate-system/path
 ```
 
 ## Usage
 
 ```javascript
-var path = require('path')
+var path = require('@susbtrate-system/path')
 
 var filename = 'logo.png';
 var logo = path.join('./assets/img', filename);
@@ -36,15 +34,7 @@ document.querySelector('#logo').src = logo;
 
 ## API
 
-See the [Node.js path docs][path]. `path-browserify` currently matches the Node.js 10.3 API.
-`path-browserify` only implements the POSIX functions, not the win32 ones.
-
-## Contributing
-
-PRs are very welcome! The main way to contribute to `path-browserify` is by porting features, bugfixes and tests from Node.js. Ideally, code contributions to this module are copy-pasted from Node.js and transpiled to ES5, rather than reimplemented from scratch. Matching the Node.js code as closely as possible makes maintenance simpler when new changes land in Node.js.
-This module intends to provide exactly the same API as Node.js, so features that are not available in the core `path` module will not be accepted. Feature requests should instead be directed at [nodejs/node](https://github.com/nodejs/node) and will be added to this module once they are implemented in Node.js.
-
-If there is a difference in behaviour between Node.js's `path` module and this module, please open an issue!
+See the [Node.js path docs][path]. `@substrate-system/path` currently matches the Node.js 10.3 API. `@substrate-system/path` only implements the POSIX functions, not the win32 ones.
 
 ## License
 
