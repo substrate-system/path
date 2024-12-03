@@ -1,10 +1,7 @@
 'use strict';
 import { test as tape } from '@substrate-system/tapzero'
 import { path } from '../src/index.js'
-import { fileURLToPath } from 'url'
-const __filename = fileURLToPath(import.meta.url)
-
-console.log('**filename****', __filename)
+const __filename = '/abc/123/bundle.js'
 
 var slashRE = /\//g;
 
