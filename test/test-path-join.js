@@ -1,6 +1,5 @@
-'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape } from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
 
 var backslashRE = /\\/g;
 
@@ -108,19 +107,17 @@ var windowsJoinTests =
 tape('path.posix.join', function (t) {
   joinTests.forEach(function (p) {
     var actual = path.posix.join.apply(null, p[0]);
-    t.strictEqual(actual, p[1]);
+    t.equal(actual, p[1]);
   });
-  t.end();
 });
 
-tape('path.win32.join', { skip: true }, function (t) {
+tape.skip('path.win32.join', function (t) {
   joinTests.forEach(function (p) {
     var actual = path.win32.join.apply(null, p[0]).replace(backslashRE, '/');
-    t.strictEqual(actual, p[1]);
+    t.equal(actual, p[1]);
   });
   windowsJoinTests.forEach(function (p) {
     var actual = path.win32.join.apply(null, p[0]);
-    t.strictEqual(actual, p[1]);
+    t.equal(actual, p[1]);
   });
-  t.end();
 });

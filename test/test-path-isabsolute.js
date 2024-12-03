@@ -1,33 +1,30 @@
-'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape } from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
 
-tape('path.win32.isAbsolute', { skip: true }, function (t) {
-  t.strictEqual(path.win32.isAbsolute('/'), true);
-  t.strictEqual(path.win32.isAbsolute('//'), true);
-  t.strictEqual(path.win32.isAbsolute('//server'), true);
-  t.strictEqual(path.win32.isAbsolute('//server/file'), true);
-  t.strictEqual(path.win32.isAbsolute('\\\\server\\file'), true);
-  t.strictEqual(path.win32.isAbsolute('\\\\server'), true);
-  t.strictEqual(path.win32.isAbsolute('\\\\'), true);
-  t.strictEqual(path.win32.isAbsolute('c'), false);
-  t.strictEqual(path.win32.isAbsolute('c:'), false);
-  t.strictEqual(path.win32.isAbsolute('c:\\'), true);
-  t.strictEqual(path.win32.isAbsolute('c:/'), true);
-  t.strictEqual(path.win32.isAbsolute('c://'), true);
-  t.strictEqual(path.win32.isAbsolute('C:/Users/'), true);
-  t.strictEqual(path.win32.isAbsolute('C:\\Users\\'), true);
-  t.strictEqual(path.win32.isAbsolute('C:cwd/another'), false);
-  t.strictEqual(path.win32.isAbsolute('C:cwd\\another'), false);
-  t.strictEqual(path.win32.isAbsolute('directory/directory'), false);
-  t.strictEqual(path.win32.isAbsolute('directory\\directory'), false);
-  t.end();
+tape.skip('path.win32.isAbsolute', function (t) {
+  t.equal(path.win32.isAbsolute('/'), true);
+  t.equal(path.win32.isAbsolute('//'), true);
+  t.equal(path.win32.isAbsolute('//server'), true);
+  t.equal(path.win32.isAbsolute('//server/file'), true);
+  t.equal(path.win32.isAbsolute('\\\\server\\file'), true);
+  t.equal(path.win32.isAbsolute('\\\\server'), true);
+  t.equal(path.win32.isAbsolute('\\\\'), true);
+  t.equal(path.win32.isAbsolute('c'), false);
+  t.equal(path.win32.isAbsolute('c:'), false);
+  t.equal(path.win32.isAbsolute('c:\\'), true);
+  t.equal(path.win32.isAbsolute('c:/'), true);
+  t.equal(path.win32.isAbsolute('c://'), true);
+  t.equal(path.win32.isAbsolute('C:/Users/'), true);
+  t.equal(path.win32.isAbsolute('C:\\Users\\'), true);
+  t.equal(path.win32.isAbsolute('C:cwd/another'), false);
+  t.equal(path.win32.isAbsolute('C:cwd\\another'), false);
+  t.equal(path.win32.isAbsolute('directory/directory'), false);
+  t.equal(path.win32.isAbsolute('directory\\directory'), false);
 });
 
 tape('path.posix.isAbsolute', function (t) {
-  t.strictEqual(path.posix.isAbsolute('/home/foo'), true);
-  t.strictEqual(path.posix.isAbsolute('/home/foo/..'), true);
-  t.strictEqual(path.posix.isAbsolute('bar/'), false);
-  t.strictEqual(path.posix.isAbsolute('./baz'), false);
-  t.end();
+  t.equal(path.posix.isAbsolute('/home/foo'), true);
+  t.equal(path.posix.isAbsolute('/home/foo/..'), true);
+  t.equal(path.posix.isAbsolute('bar/'), false);
+  t.equal(path.posix.isAbsolute('./baz'), false);
 });

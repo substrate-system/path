@@ -1,9 +1,10 @@
-require('./test-path');
-require('./test-path-basename');
-require('./test-path-dirname');
-require('./test-path-extname');
-require('./test-path-isabsolute');
-require('./test-path-join');
-require('./test-path-relative');
-require('./test-path-resolve');
-require('./test-path-zero-length-strings');
+import './test-path'
+import './test-path-basename'
+import './test-path-dirname'
+import './test-path-extname'
+import './test-path-isabsolute'
+import './test-path-join'
+import './test-path-parse-format'
+import './test-path-relative'
+import './test-path-resolve'
+import './test-path-zero-length-strings'

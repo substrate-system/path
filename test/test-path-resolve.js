@@ -1,6 +1,5 @@
-'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape } from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
 
 var windowsTests =
     // arguments                               result
@@ -18,6 +17,7 @@ var windowsTests =
      [['C:\\foo\\tmp.3\\', '..\\tmp.3\\cycles\\root.js'],
       'C:\\foo\\tmp.3\\cycles\\root.js']
     ];
+
 var posixTests =
     // arguments                    result
     [[['/var/lib', '../', 'file/'], '/var/file'],
@@ -29,17 +29,15 @@ var posixTests =
     ];
 
 tape('path.posix.resolve', function (t) {
-  posixTests.forEach(function (p) {
-    var actual = path.posix.resolve.apply(null, p[0]);
-    t.strictEqual(actual, p[1]);
+  posixTests.forEach(function (testCase) {
+    var actual = path.posix.resolve.apply(null, testCase[0]);
+    t.equal(actual, testCase[1]);
   });
-  t.end();
 });
 
-tape('path.win32.resolve', { skip: true }, function (t) {
+tape.skip('path.win32.resolve', function (t) {
   windowsTests.forEach(function (p) {
     var actual = path.win32.resolve.apply(null, p[0]);
-    t.strictEqual(actual, p[1]);
+    t.equal(actual, p[1]);
   });
-  t.end();
 });

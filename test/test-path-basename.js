@@ -1,79 +1,76 @@
-'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape} from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
 
 tape('path.basename', function (t) {
-  t.strictEqual(path.basename(__filename), 'test-path-basename.js');
-  t.strictEqual(path.basename(__filename, '.js'), 'test-path-basename');
-  t.strictEqual(path.basename('.js', '.js'), '');
-  t.strictEqual(path.basename(''), '');
-  t.strictEqual(path.basename('/dir/basename.ext'), 'basename.ext');
-  t.strictEqual(path.basename('/basename.ext'), 'basename.ext');
-  t.strictEqual(path.basename('basename.ext'), 'basename.ext');
-  t.strictEqual(path.basename('basename.ext/'), 'basename.ext');
-  t.strictEqual(path.basename('basename.ext//'), 'basename.ext');
-  t.strictEqual(path.basename('aaa/bbb', '/bbb'), 'bbb');
-  t.strictEqual(path.basename('aaa/bbb', 'a/bbb'), 'bbb');
-  t.strictEqual(path.basename('aaa/bbb', 'bbb'), 'bbb');
-  t.strictEqual(path.basename('aaa/bbb//', 'bbb'), 'bbb');
-  t.strictEqual(path.basename('aaa/bbb', 'bb'), 'b');
-  t.strictEqual(path.basename('aaa/bbb', 'b'), 'bb');
-  t.strictEqual(path.basename('/aaa/bbb', '/bbb'), 'bbb');
-  t.strictEqual(path.basename('/aaa/bbb', 'a/bbb'), 'bbb');
-  t.strictEqual(path.basename('/aaa/bbb', 'bbb'), 'bbb');
-  t.strictEqual(path.basename('/aaa/bbb//', 'bbb'), 'bbb');
-  t.strictEqual(path.basename('/aaa/bbb', 'bb'), 'b');
-  t.strictEqual(path.basename('/aaa/bbb', 'b'), 'bb');
-  t.strictEqual(path.basename('/aaa/bbb'), 'bbb');
-  t.strictEqual(path.basename('/aaa/'), 'aaa');
-  t.strictEqual(path.basename('/aaa/b'), 'b');
-  t.strictEqual(path.basename('/a/b'), 'b');
-  t.strictEqual(path.basename('//a'), 'a');
-  t.end();
+  t.equal(path.basename(__filename), 'bundle.js');
+  t.equal(path.basename(__filename, '.js'), 'bundle');
+  t.equal(path.basename('.js', '.js'), '');
+  t.equal(path.basename(''), '');
+  t.equal(path.basename('/dir/basename.ext'), 'basename.ext');
+  t.equal(path.basename('/basename.ext'), 'basename.ext');
+  t.equal(path.basename('basename.ext'), 'basename.ext');
+  t.equal(path.basename('basename.ext/'), 'basename.ext');
+  t.equal(path.basename('basename.ext//'), 'basename.ext');
+  t.equal(path.basename('aaa/bbb', '/bbb'), 'bbb');
+  t.equal(path.basename('aaa/bbb', 'a/bbb'), 'bbb');
+  t.equal(path.basename('aaa/bbb', 'bbb'), 'bbb');
+  t.equal(path.basename('aaa/bbb//', 'bbb'), 'bbb');
+  t.equal(path.basename('aaa/bbb', 'bb'), 'b');
+  t.equal(path.basename('aaa/bbb', 'b'), 'bb');
+  t.equal(path.basename('/aaa/bbb', '/bbb'), 'bbb');
+  t.equal(path.basename('/aaa/bbb', 'a/bbb'), 'bbb');
+  t.equal(path.basename('/aaa/bbb', 'bbb'), 'bbb');
+  t.equal(path.basename('/aaa/bbb//', 'bbb'), 'bbb');
+  t.equal(path.basename('/aaa/bbb', 'bb'), 'b');
+  t.equal(path.basename('/aaa/bbb', 'b'), 'bb');
+  t.equal(path.basename('/aaa/bbb'), 'bbb');
+  t.equal(path.basename('/aaa/'), 'aaa');
+  t.equal(path.basename('/aaa/b'), 'b');
+  t.equal(path.basename('/a/b'), 'b');
+  t.equal(path.basename('//a'), 'a');
 })
 
-tape('path.win32.basename', { skip: true }, function (t) {
+tape.skip('path.win32.basename', function (t) {
   // On Windows a backslash acts as a path separator.
-  t.strictEqual(path.win32.basename('\\dir\\basename.ext'), 'basename.ext');
-  t.strictEqual(path.win32.basename('\\basename.ext'), 'basename.ext');
-  t.strictEqual(path.win32.basename('basename.ext'), 'basename.ext');
-  t.strictEqual(path.win32.basename('basename.ext\\'), 'basename.ext');
-  t.strictEqual(path.win32.basename('basename.ext\\\\'), 'basename.ext');
-  t.strictEqual(path.win32.basename('foo'), 'foo');
-  t.strictEqual(path.win32.basename('aaa\\bbb', '\\bbb'), 'bbb');
-  t.strictEqual(path.win32.basename('aaa\\bbb', 'a\\bbb'), 'bbb');
-  t.strictEqual(path.win32.basename('aaa\\bbb', 'bbb'), 'bbb');
-  t.strictEqual(path.win32.basename('aaa\\bbb\\\\\\\\', 'bbb'), 'bbb');
-  t.strictEqual(path.win32.basename('aaa\\bbb', 'bb'), 'b');
-  t.strictEqual(path.win32.basename('aaa\\bbb', 'b'), 'bb');
-  t.strictEqual(path.win32.basename('C:'), '');
-  t.strictEqual(path.win32.basename('C:.'), '.');
-  t.strictEqual(path.win32.basename('C:\\'), '');
-  t.strictEqual(path.win32.basename('C:\\dir\\base.ext'), 'base.ext');
-  t.strictEqual(path.win32.basename('C:\\basename.ext'), 'basename.ext');
-  t.strictEqual(path.win32.basename('C:basename.ext'), 'basename.ext');
-  t.strictEqual(path.win32.basename('C:basename.ext\\'), 'basename.ext');
-  t.strictEqual(path.win32.basename('C:basename.ext\\\\'), 'basename.ext');
-  t.strictEqual(path.win32.basename('C:foo'), 'foo');
-  t.strictEqual(path.win32.basename('file:stream'), 'file:stream');
-  t.end();
+  t.equal(path.win32.basename('\\dir\\basename.ext'), 'basename.ext');
+  t.equal(path.win32.basename('\\basename.ext'), 'basename.ext');
+  t.equal(path.win32.basename('basename.ext'), 'basename.ext');
+  t.equal(path.win32.basename('basename.ext\\'), 'basename.ext');
+  t.equal(path.win32.basename('basename.ext\\\\'), 'basename.ext');
+  t.equal(path.win32.basename('foo'), 'foo');
+  t.equal(path.win32.basename('aaa\\bbb', '\\bbb'), 'bbb');
+  t.equal(path.win32.basename('aaa\\bbb', 'a\\bbb'), 'bbb');
+  t.equal(path.win32.basename('aaa\\bbb', 'bbb'), 'bbb');
+  t.equal(path.win32.basename('aaa\\bbb\\\\\\\\', 'bbb'), 'bbb');
+  t.equal(path.win32.basename('aaa\\bbb', 'bb'), 'b');
+  t.equal(path.win32.basename('aaa\\bbb', 'b'), 'bb');
+  t.equal(path.win32.basename('C:'), '');
+  t.equal(path.win32.basename('C:.'), '.');
+  t.equal(path.win32.basename('C:\\'), '');
+  t.equal(path.win32.basename('C:\\dir\\base.ext'), 'base.ext');
+  t.equal(path.win32.basename('C:\\basename.ext'), 'basename.ext');
+  t.equal(path.win32.basename('C:basename.ext'), 'basename.ext');
+  t.equal(path.win32.basename('C:basename.ext\\'), 'basename.ext');
+  t.equal(path.win32.basename('C:basename.ext\\\\'), 'basename.ext');
+  t.equal(path.win32.basename('C:foo'), 'foo');
+  t.equal(path.win32.basename('file:stream'), 'file:stream');
 });
 
 tape('On unix a backslash is just treated as any other character.', function (t) {
-  t.strictEqual(path.posix.basename('\\dir\\basename.ext'),
+  t.equal(path.posix.basename('\\dir\\basename.ext'),
                      '\\dir\\basename.ext');
-  t.strictEqual(path.posix.basename('\\basename.ext'), '\\basename.ext');
-  t.strictEqual(path.posix.basename('basename.ext'), 'basename.ext');
-  t.strictEqual(path.posix.basename('basename.ext\\'), 'basename.ext\\');
-  t.strictEqual(path.posix.basename('basename.ext\\\\'), 'basename.ext\\\\');
-  t.strictEqual(path.posix.basename('foo'), 'foo');
-  t.end();
+  t.equal(path.posix.basename('\\basename.ext'), '\\basename.ext');
+  t.equal(path.posix.basename('basename.ext'), 'basename.ext');
+  t.equal(path.posix.basename('basename.ext\\'), 'basename.ext\\');
+  t.equal(path.posix.basename('basename.ext\\\\'), 'basename.ext\\\\');
+  t.equal(path.posix.basename('foo'), 'foo');
 });
 
 tape('POSIX filenames may include control characters', function (t) {
   // c.f. http://www.dwheeler.com/essays/fixing-unix-linux-filenames.html
   var controlCharFilename = "Icon" + (String.fromCharCode(13));
-  t.strictEqual(path.posix.basename(("/a/b/" + controlCharFilename)),
+  t.equal(path.posix.basename(("/a/b/" + controlCharFilename)),
                      controlCharFilename);
-  t.end();
 });

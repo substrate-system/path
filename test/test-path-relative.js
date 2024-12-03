@@ -1,6 +1,5 @@
-'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape } from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
 
 var relativeTests = {
   win32:
@@ -51,16 +50,14 @@ tape('path.posix.relative', function (t) {
   relativeTests.posix.forEach(function (p) {
     var expected = p[2];
     var actual = path.posix.relative(p[0], p[1]);
-    t.strictEqual(actual, expected);
+    t.equal(actual, expected);
   });
-  t.end();
 });
 
-tape('path.win32.relative', { skip: true }, function (t) {
+tape.skip('path.win32.relative', function (t) {
   relativeTests.win32.forEach(function (p) {
     var expected = p[2];
     var actual = path.win32.relative(p[0], p[1]);
-    t.strictEqual(actual, expected);
+    t.equal(actual, expected);
   });
-  t.end();
 });

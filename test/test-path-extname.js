@@ -1,6 +1,10 @@
 'use strict';
-var tape = require('tape');
-var path = require('../');
+import { test as tape } from '@substrate-system/tapzero'
+import { path } from '../src/index.js'
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+
+console.log('**filename****', __filename)
 
 var slashRE = /\//g;
 
@@ -53,44 +57,40 @@ tape('path.posix.extname', function (t) {
   pairs.forEach(function (p) {
     var input = p[0];
     var expected = p[1];
-    t.strictEqual(expected, path.posix.extname(input));
+    t.equal(expected, path.posix.extname(input));
   });
-  t.end();
 });
 
-tape('path.win32.extname', { skip: true }, function (t) {
+tape.skip('path.win32.extname', function (t) {
   pairs.forEach(function (p) {
     var input = p[0].replace(slashRE, '\\');
     var expected = p[1];
-    t.strictEqual(expected, path.win32.extname(input));
-    t.strictEqual(expected, path.win32.extname("C:" + input));
+    t.equal(expected, path.win32.extname(input));
+    t.equal(expected, path.win32.extname("C:" + input));
   });
-  t.end();
 });
 
-tape('path.win32.extname backslash', { skip: true }, function (t) {
+tape.skip('path.win32.extname backslash', function (t) {
   // On Windows, backslash is a path separator.
-  t.strictEqual(path.win32.extname('.\\'), '');
-  t.strictEqual(path.win32.extname('..\\'), '');
-  t.strictEqual(path.win32.extname('file.ext\\'), '.ext');
-  t.strictEqual(path.win32.extname('file.ext\\\\'), '.ext');
-  t.strictEqual(path.win32.extname('file\\'), '');
-  t.strictEqual(path.win32.extname('file\\\\'), '');
-  t.strictEqual(path.win32.extname('file.\\'), '.');
-  t.strictEqual(path.win32.extname('file.\\\\'), '.');
-  t.end();
+  t.equal(path.win32.extname('.\\'), '');
+  t.equal(path.win32.extname('..\\'), '');
+  t.equal(path.win32.extname('file.ext\\'), '.ext');
+  t.equal(path.win32.extname('file.ext\\\\'), '.ext');
+  t.equal(path.win32.extname('file\\'), '');
+  t.equal(path.win32.extname('file\\\\'), '');
+  t.equal(path.win32.extname('file.\\'), '.');
+  t.equal(path.win32.extname('file.\\\\'), '.');
 });
 
 tape('path.posix.extname backslash', function (t) {
   // On *nix, backslash is a valid name component like any other character.
-  t.strictEqual(path.posix.extname('.\\'), '');
-  t.strictEqual(path.posix.extname('..\\'), '.\\');
-  t.strictEqual(path.posix.extname('file.ext\\'), '.ext\\');
-  t.strictEqual(path.posix.extname('file.ext\\\\'), '.ext\\\\');
-  t.strictEqual(path.posix.extname('file\\'), '');
-  t.strictEqual(path.posix.extname('file\\\\'), '');
-  t.strictEqual(path.posix.extname('file.\\'), '.\\');
-  t.strictEqual(path.posix.extname('file.\\\\'), '.\\\\');
-  t.end();
+  t.equal(path.posix.extname('.\\'), '');
+  t.equal(path.posix.extname('..\\'), '.\\');
+  t.equal(path.posix.extname('file.ext\\'), '.ext\\');
+  t.equal(path.posix.extname('file.ext\\\\'), '.ext\\\\');
+  t.equal(path.posix.extname('file\\'), '');
+  t.equal(path.posix.extname('file\\\\'), '');
+  t.equal(path.posix.extname('file.\\'), '.\\');
+  t.equal(path.posix.extname('file.\\\\'), '.\\\\');
 });
 

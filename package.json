@@ -1,30 +1,66 @@
 {
   "name": "@substrate-system/path",
+  "type": "module",
   "description": "the path module from node core for browsers",
   "version": "1.0.1",
+  "files": [
+    "./dist/*"
+  ],
+  "scripts": {
+    "lint": "eslint \"./**/*.{ts,js}\"",
+    "build-tests": "esbuild test/index.js --target=es2020 --bundle --keep-names > test/browser-bundle.js",
+    "test:browser": "npm run build && npm run build-tests && npm run test-tape-run",
+    "test": "esbuild test/index.js --format=esm --platform=node --bundle > test/bundle.js && node ./test/bundle.js | tap-spec",
+    "test-tape-run": "cat test/index.html | tape-run --input=html --static=test | tap-spec",
+    "build-cjs": "esbuild src/*.ts --format=cjs --keep-names --tsconfig=tsconfig.build.json --outdir=./dist --out-extension:.js=.cjs --sourcemap",
+    "build-cjs:min": "esbuild src/*.ts --format=cjs --minify --keep-names --tsconfig=tsconfig.build.json --outdir=./dist --out-extension:.js=.min.cjs --sourcemap",
+    "build-esm": "esbuild src/*.ts --format=esm --metafile=dist/meta.json --keep-names --tsconfig=tsconfig.build.json --outdir=./dist --sourcemap && tsc --emitDeclarationOnly --project tsconfig.build.json --outDir dist",
+    "build-esm:min": "esbuild ./src/*.ts --format=esm --keep-names --bundle --tsconfig=tsconfig.build.json --minify --out-extension:.js=.min.js --outdir=./dist --sourcemap",
+    "build-docs": "typedoc ./src/index.ts",
+    "build": "mkdir -p ./dist && rm -rf ./dist/* && npm run build-cjs && npm run build-esm && npm run build-esm:min && npm run build-cjs:min",
+    "toc": "markdown-toc --maxdepth 3 -i README.md",
+    "preversion": "npm run lint",
+    "version": "npm run toc && auto-changelog -p --template keepachangelog --breaking-pattern 'BREAKING CHANGE:' && git add CHANGELOG.md README.md",
+    "postversion": "git push --follow-tags && npm publish",
+    "prepublishOnly": "npm run build"
+  },
+  "bugs": "https://github.com/substrate-system/path/issues",
+  "devDependencies": {
+    "@substrate-system/debug": "^0.7.2",
+    "@substrate-system/tapzero": "^0.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "auto-changelog": "^2.4.0",
+    "esbuild": "^0.24.0",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "markdown-toc": "^1.2.0",
+    "postcss-nesting": "^13.0.0",
+    "tap-spec": "^5.0.0",
+    "tape-run": "^11.0.0",
+    "typedoc": "^0.27.0",
+    "typescript": "^5.4.5"
+  },
+  "homepage": "https://github.com/substrate-system/path",
+  "keywords": [
+    "browser",
+    "path"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/substrate-system/path.git"
+  },
   "author": {
     "name": "James Halliday",
     "email": "mail@substack.net",
     "url": "http://substack.net"
   },
-  "bugs": "https://github.com/browserify/path-browserify/issues",
-  "devDependencies": {
-    "@substrate-system/tapzero": "^0.10.5",
-    "tape": "^4.9.0"
-  },
-  "homepage": "https://github.com/browserify/path-browserify",
-  "keywords": [
-    "browser",
-    "browserify",
-    "path"
+  "contributors": [
+    {
+      "name": "Nick Thomas",
+      "email": "nichoth@nichoth.com",
+      "url": "http://nichoth.com/"
+    }
   ],
-  "license": "MIT",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/browserify/path-browserify.git"
-  },
-  "scripts": {
-    "test": "node test"
-  }
+  "license": "MIT"
 }
