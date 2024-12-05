@@ -112,7 +112,7 @@ function _format (sep, pathObject) {
 
 export default path
 
-export function basename (path, ext) {
+export function basename (path, ext?) {
     if (ext !== undefined && typeof ext !== 'string') {
         throw new TypeError('"ext" argument must be a string')
     }
