@@ -2,423 +2,33 @@
 import type Path from 'node:path'
 
 export const path:typeof Path = {
-    // path.resolve([from ...], to)
-    resolve: function resolve (...args) {
-        let resolvedPath = ''
-        let resolvedAbsolute = false
-        let cwd
-
-        for (let i = args.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-            let path
-            if (i >= 0) {
-                path = args[i]
-            } else {
-                if (cwd === undefined) {
-                    cwd = (process?.cwd() || '/')
-                }
-                path = cwd
-            }
-
-            assertPath(path)
-
-            // Skip empty entries
-            if (path.length === 0) {
-                continue
-            }
-
-            resolvedPath = path + '/' + resolvedPath
-            resolvedAbsolute = path.charCodeAt(0) === 47 /* / */
-        }
-
-        // At this point the path should be resolved to a full absolute path, but
-        // handle relative paths to be safe (might happen when process.cwd() fails)
-
-        // Normalize the path
-        resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute)
-
-        if (resolvedAbsolute) {
-            if (resolvedPath.length > 0) { return '/' + resolvedPath } else { return '/' }
-        } else if (resolvedPath.length > 0) {
-            return resolvedPath
-        } else {
-            return '.'
-        }
-    },
-
-    normalize: function normalize (path) {
-        assertPath(path)
-
-        if (path.length === 0) return '.'
-
-        const isAbsolute = path.charCodeAt(0) === 47 /* / */
-        const trailingSeparator = path.charCodeAt(path.length - 1) === 47 /* / */
-
-        // Normalize the path
-        path = normalizeStringPosix(path, !isAbsolute)
-
-        if (path.length === 0 && !isAbsolute) path = '.'
-        if (path.length > 0 && trailingSeparator) path += '/'
-
-        if (isAbsolute) return '/' + path
-        return path
-    },
-
-    isAbsolute: function isAbsolute (path) {
-        assertPath(path)
-        return path.length > 0 && path.charCodeAt(0) === 47 /* / */
-    },
-
-    join: function join (...args) {
-        if (arguments.length === 0) { return '.' }
-        let joined
-        for (let i = 0; i < arguments.length; ++i) {
-            const arg = args[i]
-            assertPath(arg)
-            if (arg.length > 0) {
-                if (joined === undefined) {
-                    joined = arg
-                } else {
-                    joined += '/' + arg
-                }
-            }
-        }
-        if (joined === undefined) { return '.' }
-
-        return path.normalize(joined)
-    },
-
-    relative: function relative (from, to) {
-        assertPath(from)
-        assertPath(to)
-
-        if (from === to) return ''
-
-        from = path.resolve(from)
-        to = path.resolve(to)
-
-        if (from === to) return ''
-
-        // Trim any leading backslashes
-        let fromStart = 1
-        for (; fromStart < from.length; ++fromStart) {
-            if (from.charCodeAt(fromStart) !== 47 /* / */) { break }
-        }
-        const fromEnd = from.length
-        const fromLen = fromEnd - fromStart
-
-        // Trim any leading backslashes
-        let toStart = 1
-        for (; toStart < to.length; ++toStart) {
-            if (to.charCodeAt(toStart) !== 47 /* / */) { break }
-        }
-        const toEnd = to.length
-        const toLen = toEnd - toStart
-
-        // Compare paths to find the longest common path from root
-        const length = fromLen < toLen ? fromLen : toLen
-        let lastCommonSep = -1
-        let i = 0
-        for (; i <= length; ++i) {
-            if (i === length) {
-                if (toLen > length) {
-                    if (to.charCodeAt(toStart + i) === 47 /* / */) {
-                        // We get here if `from` is the exact base path for `to`.
-                        // For example: from='/foo/bar'; to='/foo/bar/baz'
-                        return to.slice(toStart + i + 1)
-                    } else if (i === 0) {
-                        // We get here if `from` is the root
-                        // For example: from='/'; to='/foo'
-                        return to.slice(toStart + i)
-                    }
-                } else if (fromLen > length) {
-                    if (from.charCodeAt(fromStart + i) === 47 /* / */) {
-                        // We get here if `to` is the exact base path for `from`.
-                        // For example: from='/foo/bar/baz'; to='/foo/bar'
-                        lastCommonSep = i
-                    } else if (i === 0) {
-                        // We get here if `to` is the root.
-                        // For example: from='/foo'; to='/'
-                        lastCommonSep = 0
-                    }
-                }
-                break
-            }
-            const fromCode = from.charCodeAt(fromStart + i)
-            const toCode = to.charCodeAt(toStart + i)
-            if (fromCode !== toCode) { break } else if (fromCode === 47 /* / */) { lastCommonSep = i }
-        }
-
-        let out = ''
-        // Generate the relative path based on the path difference between `to`
-        // and `from`
-        for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
-            if (i === fromEnd || from.charCodeAt(i) === 47 /* / */) {
-                if (out.length === 0) { out += '..' } else { out += '/..' }
-            }
-        }
-
-        // Lastly, append the rest of the destination (`to`) path that comes after
-        // the common path parts
-        if (out.length > 0) { return out + to.slice(toStart + lastCommonSep) } else {
-            toStart += lastCommonSep
-            if (to.charCodeAt(toStart) === 47 /* / */) { ++toStart }
-            return to.slice(toStart)
-        }
-    },
-
     _makeLong: function _makeLong (path) {
         return path
     },
 
-    dirname: function dirname (path) {
-        assertPath(path)
-        if (path.length === 0) return '.'
-        let code = path.charCodeAt(0)
-        const hasRoot = code === 47 /* / */
-        let end = -1
-        let matchedSlash = true
-        for (let i = path.length - 1; i >= 1; --i) {
-            code = path.charCodeAt(i)
-            if (code === 47 /* / */) {
-                if (!matchedSlash) {
-                    end = i
-                    break
-                }
-            } else {
-                // We saw the first non-path separator
-                matchedSlash = false
-            }
-        }
-
-        if (end === -1) return hasRoot ? '/' : '.'
-        if (hasRoot && end === 1) return '//'
-        return path.slice(0, end)
-    },
-
-    basename: function basename (path, ext) {
-        if (ext !== undefined && typeof ext !== 'string') {
-            throw new TypeError('"ext" argument must be a string')
-        }
-        assertPath(path)
-
-        let start = 0
-        let end = -1
-        let matchedSlash = true
-        let i
-
-        if (ext !== undefined && ext.length > 0 && ext.length <= path.length) {
-            if (ext.length === path.length && ext === path) return ''
-            let extIdx = ext.length - 1
-            let firstNonSlashEnd = -1
-            for (i = path.length - 1; i >= 0; --i) {
-                const code = path.charCodeAt(i)
-                if (code === 47 /* / */) {
-                    // If we reached a path separator that was not part of a set of path
-                    // separators at the end of the string, stop now
-                    if (!matchedSlash) {
-                        start = i + 1
-                        break
-                    }
-                } else {
-                    if (firstNonSlashEnd === -1) {
-                        // We saw the first non-path separator, remember this index in case
-                        // we need it if the extension ends up not matching
-                        matchedSlash = false
-                        firstNonSlashEnd = i + 1
-                    }
-                    if (extIdx >= 0) {
-                        // Try to match the explicit extension
-                        if (code === ext.charCodeAt(extIdx)) {
-                            if (--extIdx === -1) {
-                                // We matched the extension, so mark this as the end of our path
-                                // component
-                                end = i
-                            }
-                        } else {
-                            // Extension does not match, so our result is the entire path
-                            // component
-                            extIdx = -1
-                            end = firstNonSlashEnd
-                        }
-                    }
-                }
-            }
-
-            if (start === end) end = firstNonSlashEnd; else if (end === -1) end = path.length
-            return path.slice(start, end)
-        } else {
-            for (i = path.length - 1; i >= 0; --i) {
-                if (path.charCodeAt(i) === 47 /* / */) {
-                    // If we reached a path separator that was not part of a set of path
-                    // separators at the end of the string, stop now
-                    if (!matchedSlash) {
-                        start = i + 1
-                        break
-                    }
-                } else if (end === -1) {
-                    // We saw the first non-path separator, mark this as the end of our
-                    // path component
-                    matchedSlash = false
-                    end = i + 1
-                }
-            }
-
-            if (end === -1) return ''
-            return path.slice(start, end)
-        }
-    },
-
-    extname: function extname (path) {
-        assertPath(path)
-        let startDot = -1
-        let startPart = 0
-        let end = -1
-        let matchedSlash = true
-        // Track the state of characters (if any) we see before our first dot and
-        // after any path separator we find
-        let preDotState = 0
-        for (let i = path.length - 1; i >= 0; --i) {
-            const code = path.charCodeAt(i)
-            if (code === 47 /* / */) {
-                // If we reached a path separator that was not part of a set of path
-                // separators at the end of the string, stop now
-                if (!matchedSlash) {
-                    startPart = i + 1
-                    break
-                }
-                continue
-            }
-            if (end === -1) {
-                // We saw the first non-path separator, mark this as the end of our
-                // extension
-                matchedSlash = false
-                end = i + 1
-            }
-            if (code === 46 /* . */) {
-                // If this is our first dot, mark it as the start of our extension
-                if (startDot === -1) { startDot = i } else if (preDotState !== 1) { preDotState = 1 }
-            } else if (startDot !== -1) {
-                // We saw a non-dot and non-path separator before our dot, so we should
-                // have a good chance at having a non-empty extension
-                preDotState = -1
-            }
-        }
-
-        if (
-            startDot === -1 || end === -1 ||
-            // We saw a non-dot character immediately before the dot
-            preDotState === 0 ||
-            // The (right-most) trimmed path component is exactly '..'
-            (
-                preDotState === 1 &&
-                startDot === end - 1 &&
-                startDot === startPart + 1
-            )
-        ) {
-            return ''
-        }
-
-        return path.slice(startDot, end)
-    },
+    dirname,
+    basename,
+    extname,
+    parse,
+    resolve,
+    normalize,
+    join,
+    relative,
+    isAbsolute,
 
     format: function format (pathObject) {
         if (pathObject === null || typeof pathObject !== 'object') {
-            throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof pathObject)
+            throw new TypeError('The "pathObject" argument must be of type' +
+                ' Object. Received type ' + typeof pathObject)
         }
         return _format('/', pathObject)
-    },
-
-    parse: function parse (path) {
-        assertPath(path)
-
-        const ret = { root: '', dir: '', base: '', ext: '', name: '' }
-        if (path.length === 0) return ret
-        let code = path.charCodeAt(0)
-        const isAbsolute = code === 47 /* / */
-        let start
-        if (isAbsolute) {
-            ret.root = '/'
-            start = 1
-        } else {
-            start = 0
-        }
-        let startDot = -1
-        let startPart = 0
-        let end = -1
-        let matchedSlash = true
-        let i = path.length - 1
-
-        // Track the state of characters (if any) we see before our first dot and
-        // after any path separator we find
-        let preDotState = 0
-
-        // Get non-dir info
-        for (; i >= start; --i) {
-            code = path.charCodeAt(i)
-            if (code === 47 /* / */) {
-                // If we reached a path separator that was not part of a set of path
-                // separators at the end of the string, stop now
-                if (!matchedSlash) {
-                    startPart = i + 1
-                    break
-                }
-                continue
-            }
-            if (end === -1) {
-                // We saw the first non-path separator, mark this as the end of our
-                // extension
-                matchedSlash = false
-                end = i + 1
-            }
-            if (code === 46 /* . */) {
-                // If this is our first dot, mark it as the start of our extension
-                if (startDot === -1) startDot = i; else if (preDotState !== 1) preDotState = 1
-            } else if (startDot !== -1) {
-                // We saw a non-dot and non-path separator before our dot, so we should
-                // have a good chance at having a non-empty extension
-                preDotState = -1
-            }
-        }
-
-        if (
-            startDot === -1 || end === -1 ||
-            // We saw a non-dot character immediately before the dot
-            preDotState === 0 ||
-            // The (right-most) trimmed path component is exactly '..'
-            (
-                preDotState === 1 &&
-                startDot === end - 1 &&
-                startDot === startPart + 1
-            )
-        ) {
-            if (end !== -1) {
-                if (startPart === 0 && isAbsolute) {
-                    ret.base = ret.name = path.slice(1, end)
-                } else {
-                    ret.base = ret.name = path.slice(startPart, end)
-                }
-            }
-        } else {
-            if (startPart === 0 && isAbsolute) {
-                ret.name = path.slice(1, startDot)
-                ret.base = path.slice(1, end)
-            } else {
-                ret.name = path.slice(startPart, startDot)
-                ret.base = path.slice(startPart, end)
-            }
-            ret.ext = path.slice(startDot, end)
-        }
-
-        if (startPart > 0) ret.dir = path.slice(0, startPart - 1); else if (isAbsolute) ret.dir = '/'
-
-        return ret
     },
 
     sep: '/',
     delimiter: ':',
     // @ts-expect-error skip this
     win32: null,
-    // @ts-expect-error skip this
+    // @ts-expect-error assigned below
     posix: null
 }
 
@@ -501,3 +111,404 @@ function _format (sep, pathObject) {
 }
 
 export default path
+
+export function basename (path, ext) {
+    if (ext !== undefined && typeof ext !== 'string') {
+        throw new TypeError('"ext" argument must be a string')
+    }
+    assertPath(path)
+
+    let start = 0
+    let end = -1
+    let matchedSlash = true
+    let i
+
+    if (ext !== undefined && ext.length > 0 && ext.length <= path.length) {
+        if (ext.length === path.length && ext === path) return ''
+        let extIdx = ext.length - 1
+        let firstNonSlashEnd = -1
+        for (i = path.length - 1; i >= 0; --i) {
+            const code = path.charCodeAt(i)
+            if (code === 47 /* / */) {
+                // If we reached a path separator that was not part of a set of path
+                // separators at the end of the string, stop now
+                if (!matchedSlash) {
+                    start = i + 1
+                    break
+                }
+            } else {
+                if (firstNonSlashEnd === -1) {
+                    // We saw the first non-path separator, remember this index in case
+                    // we need it if the extension ends up not matching
+                    matchedSlash = false
+                    firstNonSlashEnd = i + 1
+                }
+                if (extIdx >= 0) {
+                    // Try to match the explicit extension
+                    if (code === ext.charCodeAt(extIdx)) {
+                        if (--extIdx === -1) {
+                            // We matched the extension, so mark this as the end of our path
+                            // component
+                            end = i
+                        }
+                    } else {
+                        // Extension does not match, so our result is the entire path
+                        // component
+                        extIdx = -1
+                        end = firstNonSlashEnd
+                    }
+                }
+            }
+        }
+
+        if (start === end) end = firstNonSlashEnd; else if (end === -1) end = path.length
+        return path.slice(start, end)
+    } else {
+        for (i = path.length - 1; i >= 0; --i) {
+            if (path.charCodeAt(i) === 47 /* / */) {
+                // If we reached a path separator that was not part of a set of path
+                // separators at the end of the string, stop now
+                if (!matchedSlash) {
+                    start = i + 1
+                    break
+                }
+            } else if (end === -1) {
+                // We saw the first non-path separator, mark this as the end of our
+                // path component
+                matchedSlash = false
+                end = i + 1
+            }
+        }
+
+        if (end === -1) return ''
+        return path.slice(start, end)
+    }
+}
+
+export function extname (path) {
+    assertPath(path)
+    let startDot = -1
+    let startPart = 0
+    let end = -1
+    let matchedSlash = true
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    let preDotState = 0
+    for (let i = path.length - 1; i >= 0; --i) {
+        const code = path.charCodeAt(i)
+        if (code === 47 /* / */) {
+            // If we reached a path separator that was not part of a set of path
+            // separators at the end of the string, stop now
+            if (!matchedSlash) {
+                startPart = i + 1
+                break
+            }
+            continue
+        }
+        if (end === -1) {
+            // We saw the first non-path separator, mark this as the end of our
+            // extension
+            matchedSlash = false
+            end = i + 1
+        }
+        if (code === 46 /* . */) {
+            // If this is our first dot, mark it as the start of our extension
+            if (startDot === -1) { startDot = i } else if (preDotState !== 1) { preDotState = 1 }
+        } else if (startDot !== -1) {
+            // We saw a non-dot and non-path separator before our dot, so we should
+            // have a good chance at having a non-empty extension
+            preDotState = -1
+        }
+    }
+
+    if (
+        startDot === -1 || end === -1 ||
+        // We saw a non-dot character immediately before the dot
+        preDotState === 0 ||
+        // The (right-most) trimmed path component is exactly '..'
+        (
+            preDotState === 1 &&
+            startDot === end - 1 &&
+            startDot === startPart + 1
+        )
+    ) {
+        return ''
+    }
+
+    return path.slice(startDot, end)
+}
+
+export function parse (path) {
+    assertPath(path)
+
+    const ret = { root: '', dir: '', base: '', ext: '', name: '' }
+    if (path.length === 0) return ret
+    let code = path.charCodeAt(0)
+    const isAbsolute = code === 47 /* / */
+    let start
+    if (isAbsolute) {
+        ret.root = '/'
+        start = 1
+    } else {
+        start = 0
+    }
+    let startDot = -1
+    let startPart = 0
+    let end = -1
+    let matchedSlash = true
+    let i = path.length - 1
+
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    let preDotState = 0
+
+    // Get non-dir info
+    for (; i >= start; --i) {
+        code = path.charCodeAt(i)
+        if (code === 47 /* / */) {
+            // If we reached a path separator that was not part of a set of path
+            // separators at the end of the string, stop now
+            if (!matchedSlash) {
+                startPart = i + 1
+                break
+            }
+            continue
+        }
+        if (end === -1) {
+            // We saw the first non-path separator, mark this as the end of our
+            // extension
+            matchedSlash = false
+            end = i + 1
+        }
+        if (code === 46 /* . */) {
+            // If this is our first dot, mark it as the start of our extension
+            if (startDot === -1) startDot = i; else if (preDotState !== 1) preDotState = 1
+        } else if (startDot !== -1) {
+            // We saw a non-dot and non-path separator before our dot, so we should
+            // have a good chance at having a non-empty extension
+            preDotState = -1
+        }
+    }
+
+    if (
+        startDot === -1 || end === -1 ||
+        // We saw a non-dot character immediately before the dot
+        preDotState === 0 ||
+        // The (right-most) trimmed path component is exactly '..'
+        (
+            preDotState === 1 &&
+            startDot === end - 1 &&
+            startDot === startPart + 1
+        )
+    ) {
+        if (end !== -1) {
+            if (startPart === 0 && isAbsolute) {
+                ret.base = ret.name = path.slice(1, end)
+            } else {
+                ret.base = ret.name = path.slice(startPart, end)
+            }
+        }
+    } else {
+        if (startPart === 0 && isAbsolute) {
+            ret.name = path.slice(1, startDot)
+            ret.base = path.slice(1, end)
+        } else {
+            ret.name = path.slice(startPart, startDot)
+            ret.base = path.slice(startPart, end)
+        }
+        ret.ext = path.slice(startDot, end)
+    }
+
+    if (startPart > 0) ret.dir = path.slice(0, startPart - 1); else if (isAbsolute) ret.dir = '/'
+
+    return ret
+}
+
+export function dirname (path:string):string {
+    assertPath(path)
+    if (path.length === 0) return '.'
+    let code = path.charCodeAt(0)
+    const hasRoot = code === 47 /* / */
+    let end = -1
+    let matchedSlash = true
+    for (let i = path.length - 1; i >= 1; --i) {
+        code = path.charCodeAt(i)
+        if (code === 47 /* / */) {
+            if (!matchedSlash) {
+                end = i
+                break
+            }
+        } else {
+            // We saw the first non-path separator
+            matchedSlash = false
+        }
+    }
+
+    if (end === -1) return hasRoot ? '/' : '.'
+    if (hasRoot && end === 1) return '//'
+    return path.slice(0, end)
+}
+
+// path.resolve([from ...], to)
+export function resolve (...args) {
+    let resolvedPath = ''
+    let resolvedAbsolute = false
+    let cwd
+
+    for (let i = args.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+        let path
+        if (i >= 0) {
+            path = args[i]
+        } else {
+            if (cwd === undefined) {
+                cwd = (process?.cwd() || '/')
+            }
+            path = cwd
+        }
+
+        assertPath(path)
+
+        // Skip empty entries
+        if (path.length === 0) {
+            continue
+        }
+
+        resolvedPath = path + '/' + resolvedPath
+        resolvedAbsolute = path.charCodeAt(0) === 47 /* / */
+    }
+
+    // At this point the path should be resolved to a full absolute path, but
+    // handle relative paths to be safe (might happen when process.cwd() fails)
+
+    // Normalize the path
+    resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute)
+
+    if (resolvedAbsolute) {
+        if (resolvedPath.length > 0) { return '/' + resolvedPath } else { return '/' }
+    } else if (resolvedPath.length > 0) {
+        return resolvedPath
+    } else {
+        return '.'
+    }
+}
+
+export function normalize (path:string):string {
+    assertPath(path)
+
+    if (path.length === 0) return '.'
+
+    const isAbsolute = path.charCodeAt(0) === 47 /* / */
+    const trailingSeparator = path.charCodeAt(path.length - 1) === 47 /* / */
+
+    // Normalize the path
+    path = normalizeStringPosix(path, !isAbsolute)
+
+    if (path.length === 0 && !isAbsolute) path = '.'
+    if (path.length > 0 && trailingSeparator) path += '/'
+
+    if (isAbsolute) return '/' + path
+    return path
+}
+
+export function isAbsolute (path:string):boolean {
+    assertPath(path)
+    return path.length > 0 && path.charCodeAt(0) === 47
+}
+
+export function join (...args:string[]):string {
+    if (arguments.length === 0) { return '.' }
+    let joined
+    for (let i = 0; i < arguments.length; ++i) {
+        const arg = args[i]
+        assertPath(arg)
+        if (arg.length > 0) {
+            if (joined === undefined) {
+                joined = arg
+            } else {
+                joined += '/' + arg
+            }
+        }
+    }
+    if (joined === undefined) { return '.' }
+
+    return path.normalize(joined)
+}
+
+export function relative (from:string, to:string):string {
+    assertPath(from)
+    assertPath(to)
+
+    if (from === to) return ''
+
+    from = path.resolve(from)
+    to = path.resolve(to)
+
+    if (from === to) return ''
+
+    // Trim any leading backslashes
+    let fromStart = 1
+    for (; fromStart < from.length; ++fromStart) {
+        if (from.charCodeAt(fromStart) !== 47 /* / */) { break }
+    }
+    const fromEnd = from.length
+    const fromLen = fromEnd - fromStart
+
+    // Trim any leading backslashes
+    let toStart = 1
+    for (; toStart < to.length; ++toStart) {
+        if (to.charCodeAt(toStart) !== 47 /* / */) { break }
+    }
+    const toEnd = to.length
+    const toLen = toEnd - toStart
+
+    // Compare paths to find the longest common path from root
+    const length = fromLen < toLen ? fromLen : toLen
+    let lastCommonSep = -1
+    let i = 0
+    for (; i <= length; ++i) {
+        if (i === length) {
+            if (toLen > length) {
+                if (to.charCodeAt(toStart + i) === 47 /* / */) {
+                    // We get here if `from` is the exact base path for `to`.
+                    // For example: from='/foo/bar'; to='/foo/bar/baz'
+                    return to.slice(toStart + i + 1)
+                } else if (i === 0) {
+                    // We get here if `from` is the root
+                    // For example: from='/'; to='/foo'
+                    return to.slice(toStart + i)
+                }
+            } else if (fromLen > length) {
+                if (from.charCodeAt(fromStart + i) === 47 /* / */) {
+                    // We get here if `to` is the exact base path for `from`.
+                    // For example: from='/foo/bar/baz'; to='/foo/bar'
+                    lastCommonSep = i
+                } else if (i === 0) {
+                    // We get here if `to` is the root.
+                    // For example: from='/foo'; to='/'
+                    lastCommonSep = 0
+                }
+            }
+            break
+        }
+        const fromCode = from.charCodeAt(fromStart + i)
+        const toCode = to.charCodeAt(toStart + i)
+        if (fromCode !== toCode) { break } else if (fromCode === 47 /* / */) { lastCommonSep = i }
+    }
+
+    let out = ''
+    // Generate the relative path based on the path difference between `to`
+    // and `from`
+    for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
+        if (i === fromEnd || from.charCodeAt(i) === 47 /* / */) {
+            if (out.length === 0) { out += '..' } else { out += '/..' }
+        }
+    }
+
+    // Lastly, append the rest of the destination (`to`) path that comes after
+    // the common path parts
+    if (out.length > 0) { return out + to.slice(toStart + lastCommonSep) } else {
+        toStart += lastCommonSep
+        if (to.charCodeAt(toStart) === 47 /* / */) { ++toStart }
+        return to.slice(toStart)
+    }
+}
